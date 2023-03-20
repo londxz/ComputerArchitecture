@@ -1,5 +1,7 @@
 #!/bin/bash
 usagelimit=1
+i=1
+N=4
 
 if [ ! -d "/media/conk/LOG" ]
 then
@@ -24,15 +26,15 @@ if [ $usage -ge $usagelimit ]
 then
 	cd /media/conk/LOG
 	list=()
-	for file in $(ls -t | tail -n4)
+	for file in $(ls -t | tail -n$N)
 	do
 		if [ $file != "lost+found" ]
 		then
 			list+=( $file )
+			i=$((i + 1))
 		fi
 	done
-	
-	if [ ! ${#list[0]} -eq 0 ]
+	if [ ! ${#list[0]} -eq 0  ] && [[ $i -ge $N ]]
 	then
 		tar -czf /media/conk/BACKUP/archive.tar.gz ${list[@]}
 		for file in /media/conk/LOG/${list[@]}
@@ -40,7 +42,8 @@ then
 			rm $file
 		done
 	else
-		echo "Not enough file in LOG"
+		echo "Not enough files in LOG"
+		exit 0
 	fi
-	echo "Script has finished successfully"
+	echo "Success"
 fi
