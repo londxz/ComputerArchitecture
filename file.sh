@@ -1,5 +1,5 @@
 #!/bin/bash
-usagelimit=1
+usagelimit=0
 i=1
 N=4
 
@@ -9,7 +9,13 @@ then
 	exit 0
 fi
 
-usage=$(df --output=pcent /media/conk/LOG | grep -o '[0-9]*')
+if [[ ! $logusage -ge $usagelimit ]]
+then
+	echo "LOG usage is less than $usagelimit%"
+	exit 0
+fi
+
+logusage=$(df --output=pcent /media/conk/LOG | grep -o '[0-9]*')
 
 if [ ! -d "/media/conk/BACKUP" ]
 then
@@ -17,12 +23,15 @@ then
 	exit 0
 fi
 
-if [ ! $usage -ge $usagelimit ]
+backupusage=$(df --output=pcent /media/conk/BACKUP | grep -o '[0-9]*')
+
+if [ $backupusage -eq 100 ]
 then
-	echo "LOG usage is less than $usagelimit%"
+	echo "BACKUP is full"
 	exit 0
 fi
-if [ $usage -ge $usagelimit ]
+
+if [ $logusage -ge $usagelimit ]
 then
 	cd /media/conk/LOG
 	list=()
